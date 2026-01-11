@@ -6,6 +6,9 @@ if (!isset($_SESSION['logged_in'])) {
 }
 
 require_once 'db.php';
+require "C:/xampp/htdocs/csapp/vendor/autoload.php";
+$chartFile = __DIR__ . '/../charts/chart.png';
+
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -59,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sql = "SELECT * FROM customers LIMIT 10"; // Default query
     }
 
-    try {
+    try {   
         $stmt = $pdo->query($sql);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -141,6 +144,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </tbody>
             </table>
 
+            <!-- EXPORT BUTTONS -->
+            <div class="mb-4">
+                <h5>Export Results:</h5>
+                <a href="exports/export_handler.php?type=<?= urlencode($segmentationType) ?>&format=csv" class="btn btn-outline-primary me-2">
+                    Export CSV
+                </a>
+                <a href="exports/export_handler.php?type=<?= urlencode($segmentationType) ?>&format=excel" class="btn btn-outline-success me-2">
+                    Export Excel
+                </a>
+                <a href="exports/export_handler.php?type=<?= urlencode($segmentationType) ?>&format=pdf" class="btn btn-outline-danger">
+                    Export PDF
+                </a>
+            </div>
+
+
             <!-- Insights Section -->
             <div class="alert alert-info mb-4">
                 <h5>Analysis Insights:</h5>
@@ -154,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="col-md-4">
                     <canvas id="pieChart" width="200" height="200"></canvas>
-                </div>
+                </div>  
             </div>
 
             <script>
