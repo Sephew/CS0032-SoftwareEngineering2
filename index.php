@@ -58,6 +58,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sql = "SELECT CASE WHEN purchase_amount < 1000 THEN 'Low Spender (<1k)' WHEN purchase_amount BETWEEN 1000 AND 3000 THEN 'Medium Spender (1k-3k)' ELSE 'High Spender (>3k)' END AS purchase_tier, COUNT(*) AS total_customers, ROUND(AVG(income), 2) AS avg_income FROM customers GROUP BY purchase_tier ORDER BY purchase_tier";
             break;
 
+        case 'clv':
+            // Customer Lifetime Value (CLV) Segmentation using pre-calculated CLV values
+            // CLV Tiers: Bronze (<$3k), Silver ($3k-$8k), Gold ($8k-$15k), Platinum ($15k+)
+            $sql = "SELECT 
+                        COALESCE(clv_tier, 'Bronze') as clv_tier,
+                        COUNT(*) AS total_customers,
+                        ROUND(AVG(purchase_amount), 2) AS avg_purchase_amount,
+                        ROUND(AVG(purchase_frequency), 1) AS avg_frequency,
+                        ROUND(AVG(calculated_clv), 2) AS avg_clv,
+                        ROUND(AVG(income), 2) AS avg_income,
+                        ROUND(AVG(customer_lifespan_months) / 12, 1) AS avg_lifespan_years
+                    FROM customers
+                    WHERE clv_tier IS NOT NULL OR (calculated_clv IS NOT NULL AND calculated_clv > 0)
+                    GROUP BY clv_tier
+                    ORDER BY FIELD(clv_tier, 'Platinum', 'Gold', 'Silver', 'Bronze')";
+            break;
+
         default:
             $sql = "SELECT * FROM customers LIMIT 10"; // Default query
     }
@@ -99,6 +116,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <small class="text-muted ms-2">Generate customer segments</small>
             </div>
             <div>
+                <a href="export_history.php" class="btn btn-info me-2" title="View export history">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16" style="vertical-align: -2px;">
+                        <path d="M8.515 1.019A7 7 0 0 0 1 7a7 7 0 0 0 8.51 6.981 7.003 7.003 0 0 1-.517-1.003 6 6 0 1 1 .89-6.888c.12-.04.232-.082.341-.126a6.97 6.97 0 0 0-.817-2.052A7 7 0 0 0 8.515 1.019zm2.71-1.025a.5.5 0 0 1 .572.595l-.712 3.591a.5.5 0 0 1-.936.122l-.008-.016-2.079-3.484a.5.5 0 0 1 .12-.925l.16-.053 3.507 2.26.005-.009a.5.5 0 0 1 .375.84l-.375.84z"/>
+                    </svg>
+                    Export History
+                </a>
                 <a href="logout.php" class="btn btn-danger">Logout</a>
             </div>
         </div>
@@ -116,6 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <option value="income_bracket">By Income Bracket</option>
                             <option value="cluster">By Cluster</option>
                             <option value="purchase_tier">By Purchase Tier</option>
+                            <option value="clv">By CLV Tiers</option>
                         </select>
                         <button type="submit" class="btn btn-primary">Show Results</button>
                     </div>
@@ -145,17 +169,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </table>
 
             <!-- EXPORT BUTTONS -->
-            <div class="mb-4">
-                <h5>Export Results:</h5>
-                <a href="exports/export_handler.php?type=<?= urlencode($segmentationType) ?>&format=csv" class="btn btn-outline-primary me-2">
-                    Export CSV
-                </a>
-                <a href="exports/export_handler.php?type=<?= urlencode($segmentationType) ?>&format=excel" class="btn btn-outline-success me-2">
-                    Export Excel
-                </a>
-                <a href="exports/export_handler.php?type=<?= urlencode($segmentationType) ?>&format=pdf" class="btn btn-outline-danger">
-                    Export PDF
-                </a>
+            <div class="mb-4 d-flex justify-content-end">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Export as
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="exportDropdown">
+                        <li><a class="dropdown-item" href="#" data-format="csv" onclick="openExportModal('csv'); return false;">CSV</a></li>
+                        <li><a class="dropdown-item" href="#" data-format="excel" onclick="openExportModal('excel'); return false;">Excel</a></li>
+                        <li><a class="dropdown-item" href="#" data-format="pdf" onclick="openExportModal('pdf'); return false;">PDF</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Export Column Filter Modal -->
+            <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exportModalLabel">Select Columns to Export</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="columnCheckboxes"></div>
+                            <div class="mt-2">
+                                <small class="text-muted">All columns are selected by default</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="exportConfirmBtn">Export</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
 
@@ -180,6 +226,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const labels = <?= json_encode(array_column($results, array_keys($results[0])[0])) ?>;
                 const data = <?= json_encode(array_column($results, array_keys($results[0])[1])) ?>;
                 const results = <?= json_encode($results) ?>;
+                let currentExportFormat = '';
+                let allColumns = results.length > 0 ? Object.keys(results[0]) : [];
+
+                // Export Modal Functions
+                function openExportModal(format) {
+                    currentExportFormat = format;
+                    
+                    // Get available columns from current results
+                    const columns = allColumns;
+                    
+                    // Generate checkboxes for each column
+                    // First column is always exported and cannot be unchecked
+                    const checkboxHTML = columns.map((col, index) => {
+                        const isMainColumn = index === 0;
+                        const disabledAttr = isMainColumn ? 'disabled' : '';
+                        const checkedAttr = 'checked';
+                        return `
+                        <div class="form-check">
+                            <input class="form-check-input column-checkbox" type="checkbox" id="col_${col}" value="${col}" ${checkedAttr} ${disabledAttr}>
+                            <label class="form-check-label ${isMainColumn ? 'text-muted' : ''}" for="col_${col}" ${isMainColumn ? 'style="cursor: not-allowed;"' : ''}>
+                                ${col.replace(/_/g, ' ').charAt(0).toUpperCase() + col.replace(/_/g, ' ').slice(1)}
+                                ${isMainColumn ? '<small class="ms-2">(always exported)</small>' : ''}
+                            </label>
+                        </div>
+                    `}).join('');
+                    
+                    document.getElementById('columnCheckboxes').innerHTML = checkboxHTML;
+                    document.getElementById('exportModalLabel').textContent = `Select Columns to Export as ${format.toUpperCase()}`;
+                    
+                    // Show the modal
+                    const modal = new bootstrap.Modal(document.getElementById('exportModal'));
+                    modal.show();
+                }
+
+                document.getElementById('exportConfirmBtn').addEventListener('click', function() {
+                    // Get selected columns
+                    const selectedColumns = Array.from(document.querySelectorAll('.column-checkbox:checked'))
+                        .map(cb => cb.value)
+                        .join(',');
+                    
+                    if (selectedColumns.length === 0) {
+                        alert('Please select at least one column to export');
+                        return;
+                    }
+                    
+                    // Build export URL
+                    const exportUrl = `exports/export_handler.php?type=${encodeURIComponent('<?= $segmentationType ?>')}&format=${currentExportFormat}&columns=${encodeURIComponent(selectedColumns)}`;
+                    
+                    // Trigger download
+                    window.location.href = exportUrl;
+                    
+                    // Close modal
+                    bootstrap.Modal.getInstance(document.getElementById('exportModal')).hide();
+                });
 
                 // Generate insights based on segmentation type
                 let insights = '';
@@ -255,45 +355,103 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <li>Understanding spending tiers enables personalized product recommendations</li>
                         </ul>`;
                         break;
+
+                    case 'clv':
+                        insights = `<ul>
+                            <li><strong>Customer Lifetime Value (CLV):</strong> ${labels.length} distinct value tiers identified</li>
+                            <li><strong>Premium Segment:</strong> ${(data[0] + (data[1]||0)).toLocaleString()} customers in Platinum/Gold tiers (${(((data[0] + (data[1]||0))/totalCustomers)*100).toFixed(1)}% of base)</li>
+                            <li><strong>Highest Value Tier:</strong> ${labels[0]} tier with average CLV of $${results.length > 0 && results[0].avg_clv ? parseFloat(results[0].avg_clv).toLocaleString() : '0'}</li>
+                            <li><strong>Customer Longevity:</strong> Premium tiers average ${results.length > 0 && results[0].avg_lifespan_years ? Math.max(...results.map(r => parseFloat(r.avg_lifespan_years))).toFixed(1) : '0'} years with company</li>
+                            <li><strong>Growth Opportunity:</strong> ${(data[data.length - 1] || 0).toLocaleString()} Bronze-tier customers ($0-3k CLV) represent upgrade potential</li>
+                            <li><strong>Strategic Focus:</strong> Retain Platinum tier, accelerate Gold tier progression, convert Silver to Gold</li>
+                            <li><strong>Marketing Strategy:</strong> Premium offerings for Platinum, loyalty programs for Gold, value-based promotions for Bronze</li>
+                        </ul>`;
+                        break;
                 }
 
                 document.getElementById('insights').innerHTML = insights;
 
-                // Main Bar/Line Chart
+                // Main Chart - Customized for CLV
                 const ctx1 = document.getElementById('mainChart').getContext('2d');
-                const chartType = (segmentationType === 'age_group' || segmentationType === 'income_bracket') ? 'line' : 'bar';
-
-                new Chart(ctx1, {
-                    type: chartType,
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: '<?= ucfirst(str_replace('_', ' ', array_keys($results[0])[1])) ?>',
-                            data: data,
-                            backgroundColor: chartType === 'bar' ? 'rgba(54, 162, 235, 0.6)' : 'rgba(54, 162, 235, 0.2)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 2,
-                            fill: chartType === 'line'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Customer Distribution by <?= ucfirst(str_replace('_', ' ', $segmentationType)) ?>'
-                            },
-                            legend: {
-                                display: true
-                            }
+                
+                if (segmentationType === 'clv') {
+                    // CLV-specific horizontal bar chart with tier colors
+                    const clvTierColors = {
+                        'Bronze': 'rgba(150, 150, 150, 0.8)',
+                        'Silver': 'rgba(192, 192, 192, 0.8)',
+                        'Gold': 'rgba(255, 215, 0, 0.8)',
+                        'Platinum': 'rgba(185, 142, 211, 0.8)'
+                    };
+                    
+                    const tierColors = labels.map(tier => clvTierColors[tier] || 'rgba(100, 100, 100, 0.8)');
+                    
+                    new Chart(ctx1, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Customer Count',
+                                data: data,
+                                backgroundColor: tierColors,
+                                borderColor: tierColors.map(c => c.replace('0.8', '1')),
+                                borderWidth: 2
+                            }]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Customer Distribution by CLV Tier'
+                                },
+                                legend: {
+                                    display: true
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    beginAtZero: true
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                } else {
+                    // Standard chart for other segmentation types
+                    const chartType = (segmentationType === 'age_group' || segmentationType === 'income_bracket') ? 'bar' : 'bar';
+
+                    new Chart(ctx1, {
+                        type: chartType,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '<?= ucfirst(str_replace('_', ' ', array_keys($results[0])[1])) ?>',
+                                data: data,
+                                backgroundColor: chartType === 'bar' ? 'rgba(54, 162, 235, 0.6)' : 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 2,
+                                fill: chartType === 'line'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Customer Distribution by <?= ucfirst(str_replace('_', ' ', $segmentationType)) ?>'
+                                },
+                                legend: {
+                                    display: true
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
 
                 // Pie Chart for Distribution
                 const ctx2 = document.getElementById('pieChart').getContext('2d');
@@ -336,6 +494,110 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     }
                 });
+
+                // CLV Combination Chart (Bar + Line)
+                if (segmentationType === 'clv' && results.length > 0 && results[0].avg_clv) {
+                    const clvValues = results.map(r => parseFloat(r.avg_clv) || 0);
+                    
+                    // Create container for combination chart
+                    const chartContainer = document.querySelector('.row.mb-4');
+                    if (chartContainer) {
+                        const newDiv = document.createElement('div');
+                        newDiv.className = 'col-md-12 mt-5';
+                        newDiv.innerHTML = '<h5 style="margin-bottom: 20px;">CLV Performance Analysis</h5><canvas id="clvCombinationChart" style="max-height: 300px;"></canvas>';
+                        chartContainer.parentNode.insertBefore(newDiv, chartContainer.nextSibling);
+                        
+                        const clvTierColors = {
+                            'Bronze': 'rgba(150, 150, 150, 0.9)',
+                            'Silver': 'rgba(192, 192, 192, 0.9)',
+                            'Gold': 'rgba(255, 215, 0, 0.9)',
+                            'Platinum': 'rgba(185, 142, 211, 0.9)'
+                        };
+                        
+                        setTimeout(() => {
+                            const combinationCtx = document.getElementById('clvCombinationChart')?.getContext('2d');
+                            if (combinationCtx) {
+                                new Chart(combinationCtx, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: labels,
+                                        datasets: [
+                                            {
+                                                label: 'Customer Count',
+                                                data: data,
+                                                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                                borderColor: 'rgba(54, 162, 235, 1)',
+                                                borderWidth: 2,
+                                                yAxisID: 'y',
+                                                order: 2
+                                            },
+                                            {
+                                                label: 'Average CLV ($)',
+                                                data: clvValues,
+                                                borderColor: labels.map(tier => clvTierColors[tier] || 'rgba(100, 100, 100, 1)'),
+                                                backgroundColor: labels.map(tier => clvTierColors[tier] || 'rgba(100, 100, 100, 0.2)'),
+                                                borderWidth: 3,
+                                                type: 'line',
+                                                fill: true,
+                                                yAxisID: 'y1',
+                                                tension: 0.4,
+                                                pointRadius: 6,
+                                                pointBackgroundColor: labels.map(tier => clvTierColors[tier] || 'rgba(100, 100, 100, 0.9)'),
+                                                pointBorderColor: '#fff',
+                                                pointBorderWidth: 2,
+                                                order: 1
+                                            }
+                                        ]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        plugins: {
+                                            title: {
+                                                display: true,
+                                                text: 'Combination: Customer Count (Bar) + Average CLV (Line)'
+                                            },
+                                            legend: {
+                                                display: true,
+                                                position: 'top'
+                                            }
+                                        },
+                                        scales: {
+                                            y: {
+                                                type: 'linear',
+                                                display: true,
+                                                position: 'left',
+                                                title: {
+                                                    display: true,
+                                                    text: 'Number of Customers',
+                                                    color: 'rgba(54, 162, 235, 1)'
+                                                },
+                                                ticks: {
+                                                    color: 'rgba(54, 162, 235, 1)'
+                                                }
+                                            },
+                                            y1: {
+                                                type: 'linear',
+                                                display: true,
+                                                position: 'right',
+                                                title: {
+                                                    display: true,
+                                                    text: 'Average CLV ($)',
+                                                    color: 'rgba(100, 100, 100, 1)'
+                                                },
+                                                ticks: {
+                                                    color: 'rgba(100, 100, 100, 1)'
+                                                },
+                                                grid: {
+                                                    drawOnChartArea: false
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }, 100);
+                    }
+                }
             </script>
 
             <!-- Enhanced Cluster Visualizations -->
@@ -678,5 +940,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
         });
     </script>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
