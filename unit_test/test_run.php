@@ -1,43 +1,66 @@
 <?php
+use PHPUnit\Framework\TestCase;
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
+// Adjust path to your run_clustering.php
 require_once __DIR__ . '/../run_clustering.php';
-require_once 'kmeans.php';
 
-// Mock DB connection since your script requires 'db.php'
-// If you don't have db.php ready, comment out 'require_once db.php' in kmeans.php
-$kmeans = new KMeansClustering(3);
+class test_run extends TestCase {
+    private $kmeans;
 
-echo "--- STARTING NORMALIZATION TESTS ---\n\n";
+    protected function setUp(): void {
+        $this->kmeans = new KMeansClustering();
+    }
 
-// SCENARIO 1: Normal Data & Negative Values
-$data1 = [
-    ['customer_id' => 1, 'age' => 10, 'income' => -100, 'purchase_amount' => 50],
-    ['customer_id' => 2, 'age' => 20, 'income' => 0,    'purchase_amount' => 100],
-    ['customer_id' => 3, 'age' => 30, 'income' => 100,  'purchase_amount' => 150],
-];
+    /**
+     * Helper to access the private euclideanDistance method
+     */
+    private function getDistance($p1, $p2) {
+        $reflection = new ReflectionClass(get_class($this->kmeans));
+        $method = $reflection->getMethod('euclideanDistance');
+        $method->setAccessible(true);
+        return $method->invokeArgs($this->kmeans, [$p1, $p2]);
+    }
 
-echo "Test 1: Normal + Negative Values\n";
-$result1 = $kmeans->normalizeData($data1);
-print_r($result1); 
+    // =================================================================
+    // EUCLIDEAN DISTANCE TEST CASES
+    // =================================================================
 
-// SCENARIO 2: Zero Standard Deviation (All values same)
-$data2 = [
-    ['customer_id' => 4, 'age' => 25, 'income' => 5000, 'purchase_amount' => 200],
-    ['customer_id' => 5, 'age' => 25, 'income' => 5000, 'purchase_amount' => 200],
-];
+    /**
+     * Test 1: Pythagorean Theorem (3-4-5 Triangle)
+     * Verifies that sqrt(3^2 + 4^2) = 5
+     */
+    public function testEuclideanPythagoreanStandard() {
+        $p1 = ['age' => 0, 'income' => 0, 'purchase' => 0];
+        $p2 = ['age' => 3, 'income' => 4, 'purchase' => 0];
 
-echo "\nTest 2: Zero Standard Deviation (Should not crash)\n";
-$result2 = $kmeans->normalizeData($data2);
-print_r($result2 . "\n");
+        $dist = $this->getDistance($p1, $p2);
+        
+        $this->assertEquals(5, $dist, "Geometry error: 3-4-5 triangle should yield distance 5.");
+    }
 
-// SCENARIO 3: Empty Array
-echo "\nTest 3: Empty Array\n";
-try {
-    $result3 = $kmeans->normalizeData([]);
-    echo "Success: Handled empty array.\n";
-} catch (Exception $e) {
-    echo "Error: " . $e->getMessage() . "\n";
+    /**
+     * Test 2: Identity Property (Distance to Self)
+     * Verifies that d(x, x) = 0
+     */
+    public function testEuclideanIdentity() {
+        $p1 = ['age' => 45, 'income' => 75000, 'purchase' => 2500];
+
+        $dist = $this->getDistance($p1, $p1);
+
+        $this->assertEquals(0, $dist, "Identity error: Distance to self must be exactly 0.");
+    }
+
+    /**
+     * Test 3: Absolute Displacement (Negative Coordinates)
+     * Verifies that distance is calculated correctly across axes
+     */
+    public function testEuclideanNegativeCoordinates() {
+        $p1 = ['age' => -5, 'income' => 0, 'purchase' => 0];
+        $p2 = ['age' => 5,  'income' => 0, 'purchase' => 0];
+
+        $dist = $this->getDistance($p1, $p2);
+
+        // Distance between -5 and 5 is 10
+        $this->assertEquals(10, $dist, "Calculation error: Distance between -5 and 5 should be 10.");
+    }
 }
