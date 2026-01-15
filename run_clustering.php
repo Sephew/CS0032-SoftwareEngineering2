@@ -498,7 +498,11 @@ function updateDatabase($pdo, $labels, $clusterStats) {
 
 // Determine if running from CLI or web
 $isCLI = php_sapi_name() === 'cli';
+<<<<<<< HEAD
 
+=======
+if (basename(__FILE__) == basename($_SERVER['PHP_SELF'])) {
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
 if (!$isCLI) {
     header('Content-Type: text/html; charset=utf-8');
     echo "<!DOCTYPE html><html><head><title>K-Means Clustering</title>";
@@ -506,7 +510,11 @@ if (!$isCLI) {
     echo ".success{color:#4ec9b0;} .error{color:#f48771;} .info{color:#569cd6;}</style></head><body>";
     echo "<h2>K-Means Customer Clustering</h2><pre>";
 }
+<<<<<<< HEAD
 
+=======
+}
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
 // Get number of clusters
 $numClusters = DEFAULT_CLUSTERS;
 if ($isCLI && isset($argv[1])) {

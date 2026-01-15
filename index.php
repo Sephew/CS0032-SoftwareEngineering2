@@ -6,9 +6,12 @@ if (!isset($_SESSION['logged_in'])) {
 }
 
 require_once 'db.php';
+<<<<<<< HEAD
 require "C:/xampp/htdocs/csapp/vendor/autoload.php";
 $chartFile = __DIR__ . '/../charts/chart.png';
 
+=======
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -58,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sql = "SELECT CASE WHEN purchase_amount < 1000 THEN 'Low Spender (<1k)' WHEN purchase_amount BETWEEN 1000 AND 3000 THEN 'Medium Spender (1k-3k)' ELSE 'High Spender (>3k)' END AS purchase_tier, COUNT(*) AS total_customers, ROUND(AVG(income), 2) AS avg_income FROM customers GROUP BY purchase_tier ORDER BY purchase_tier";
             break;
 
+<<<<<<< HEAD
         case 'clv':
             // Customer Lifetime Value (CLV) Segmentation using pre-calculated CLV values
             // CLV Tiers: Bronze (<$3k), Silver ($3k-$8k), Gold ($8k-$15k), Platinum ($15k+)
@@ -75,11 +79,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ORDER BY FIELD(clv_tier, 'Platinum', 'Gold', 'Silver', 'Bronze')";
             break;
 
+=======
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
         default:
             $sql = "SELECT * FROM customers LIMIT 10"; // Default query
     }
 
+<<<<<<< HEAD
     try {   
+=======
+    try {
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
         $stmt = $pdo->query($sql);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -106,12 +116,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Action Buttons -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
+<<<<<<< HEAD
                 <a href="executive_dashboard.php" class="btn btn-primary me-2" title="View executive dashboard with key metrics">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up" viewBox="0 0 16 16" style="vertical-align: -2px;">
                         <path d="M0 0h1v15h15v1H0zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 1 1-.74-.668L13.031 4 9.582 1.854a.5.5 0 1 1 .736-.669l4.5 3.928z"/>
                     </svg>
                     Executive Dashboard
                 </a>
+=======
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
                 <a href="run_clustering.php?clusters=5" class="btn btn-success" target="_blank"
                    title="Run k-means clustering to segment customers">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16" style="vertical-align: -2px;">
@@ -122,12 +135,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <small class="text-muted ms-2">Generate customer segments</small>
             </div>
             <div>
+<<<<<<< HEAD
                 <a href="export_history.php" class="btn btn-info me-2" title="View export history">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock-history" viewBox="0 0 16 16" style="vertical-align: -2px;">
                         <path d="M8.515 1.019A7 7 0 0 0 1 7a7 7 0 0 0 8.51 6.981 7.003 7.003 0 0 1-.517-1.003 6 6 0 1 1 .89-6.888c.12-.04.232-.082.341-.126a6.97 6.97 0 0 0-.817-2.052A7 7 0 0 0 8.515 1.019zm2.71-1.025a.5.5 0 0 1 .572.595l-.712 3.591a.5.5 0 0 1-.936.122l-.008-.016-2.079-3.484a.5.5 0 0 1 .12-.925l.16-.053 3.507 2.26.005-.009a.5.5 0 0 1 .375.84l-.375.84z"/>
                     </svg>
                     Export History
                 </a>
+=======
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
                 <a href="logout.php" class="btn btn-danger">Logout</a>
             </div>
         </div>
@@ -145,7 +161,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <option value="income_bracket">By Income Bracket</option>
                             <option value="cluster">By Cluster</option>
                             <option value="purchase_tier">By Purchase Tier</option>
+<<<<<<< HEAD
                             <option value="clv">By CLV Tiers</option>
+=======
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
                         </select>
                         <button type="submit" class="btn btn-primary">Show Results</button>
                     </div>
@@ -174,6 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </tbody>
             </table>
 
+<<<<<<< HEAD
             <!-- EXPORT BUTTONS -->
             <div class="mb-4 d-flex justify-content-end">
                 <div class="dropdown">
@@ -211,6 +231,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
 
+=======
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
             <!-- Insights Section -->
             <div class="alert alert-info mb-4">
                 <h5>Analysis Insights:</h5>
@@ -224,7 +246,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="col-md-4">
                     <canvas id="pieChart" width="200" height="200"></canvas>
+<<<<<<< HEAD
                 </div>  
+=======
+                </div>
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
             </div>
 
             <script>
@@ -232,6 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const labels = <?= json_encode(array_column($results, array_keys($results[0])[0])) ?>;
                 const data = <?= json_encode(array_column($results, array_keys($results[0])[1])) ?>;
                 const results = <?= json_encode($results) ?>;
+<<<<<<< HEAD
                 let currentExportFormat = '';
                 let allColumns = results.length > 0 ? Object.keys(results[0]) : [];
 
@@ -286,6 +313,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Close modal
                     bootstrap.Modal.getInstance(document.getElementById('exportModal')).hide();
                 });
+=======
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
 
                 // Generate insights based on segmentation type
                 let insights = '';
@@ -361,6 +390,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <li>Understanding spending tiers enables personalized product recommendations</li>
                         </ul>`;
                         break;
+<<<<<<< HEAD
 
                     case 'clv':
                         insights = `<ul>
@@ -373,10 +403,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <li><strong>Marketing Strategy:</strong> Premium offerings for Platinum, loyalty programs for Gold, value-based promotions for Bronze</li>
                         </ul>`;
                         break;
+=======
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
                 }
 
                 document.getElementById('insights').innerHTML = insights;
 
+<<<<<<< HEAD
                 // Main Chart - Customized for CLV
                 const ctx1 = document.getElementById('mainChart').getContext('2d');
                 
@@ -458,6 +491,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     });
                 }
+=======
+                // Main Bar/Line Chart
+                const ctx1 = document.getElementById('mainChart').getContext('2d');
+                const chartType = (segmentationType === 'age_group' || segmentationType === 'income_bracket') ? 'line' : 'bar';
+
+                new Chart(ctx1, {
+                    type: chartType,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '<?= ucfirst(str_replace('_', ' ', array_keys($results[0])[1])) ?>',
+                            data: data,
+                            backgroundColor: chartType === 'bar' ? 'rgba(54, 162, 235, 0.6)' : 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2,
+                            fill: chartType === 'line'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Customer Distribution by <?= ucfirst(str_replace('_', ' ', $segmentationType)) ?>'
+                            },
+                            legend: {
+                                display: true
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
 
                 // Pie Chart for Distribution
                 const ctx2 = document.getElementById('pieChart').getContext('2d');
@@ -500,6 +570,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     }
                 });
+<<<<<<< HEAD
 
                 // CLV Combination Chart (Bar + Line)
                 if (segmentationType === 'clv' && results.length > 0 && results[0].avg_clv) {
@@ -604,6 +675,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }, 100);
                     }
                 }
+=======
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
             </script>
 
             <!-- Enhanced Cluster Visualizations -->
@@ -946,8 +1019,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
         });
     </script>
+<<<<<<< HEAD
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+=======
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
 </body>
 </html>

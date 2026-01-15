@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "info": {
     "_postman_id": "csapp-api-collection",
@@ -796,3 +797,803 @@
     }
   ]
 }
+=======
+{
+  "info": {
+    "_postman_id": "csapp-api-collection",
+    "name": "Customer Segmentation API",
+    "description": "RESTful API for customer segmentation data and analytics",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login (Get JWT Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('access_token', jsonData.access_token);",
+                  "    console.log('Token set: ' + jsonData.access_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user@example.com\",\n  \"password\": \"secure_password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Segments",
+      "item": [
+        {
+          "name": "Get CLV Segments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/segments/clv?limit=50&offset=0&sort_by=total_customers&sort_order=DESC",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "segments",
+                "clv"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "total_customers"
+                },
+                {
+                  "key": "sort_order",
+                  "value": "DESC"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Gender Segments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/segments/gender?limit=50&offset=0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "segments",
+                "gender"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Region Segments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/segments/region?limit=50&offset=0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "segments",
+                "region"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Age Group Segments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/segments/age_group?limit=50&offset=0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "segments",
+                "age_group"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Income Bracket Segments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/segments/income_bracket?limit=50&offset=0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "segments",
+                "income_bracket"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Purchase Tier Segments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/segments/purchase_tier?limit=50&offset=0",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "segments",
+                "purchase_tier"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Cluster Segments (Detailed)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/segments/cluster?limit=50&offset=0&include_metadata=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "segments",
+                "cluster"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                },
+                {
+                  "key": "include_metadata",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Clusters",
+      "item": [
+        {
+          "name": "List All Clusters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clusters?include_metadata=true&include_stats=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clusters"
+              ],
+              "query": [
+                {
+                  "key": "include_metadata",
+                  "value": "true"
+                },
+                {
+                  "key": "include_stats",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Run Clustering (K-Means)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 202) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('job_id', jsonData.data.job_id);",
+                  "    console.log('Job ID: ' + jsonData.data.job_id);",
+                  "    console.log('Estimated time: ' + jsonData.data.estimated_time_seconds + ' seconds');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"n_clusters\": 5,\n  \"algorithm\": \"kmeans\",\n  \"features\": [\"income\", \"purchase_amount\", \"purchase_frequency\"],\n  \"normalize\": true,\n  \"random_state\": 42\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/clusters/run",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clusters",
+                "run"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Clustering Job Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/clusters/jobs/{{job_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "clusters",
+                "jobs",
+                "{{job_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Get Customer Segment (ID: 12345)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/customers/12345/segment?include_insights=true",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customers",
+                "12345",
+                "segment"
+              ],
+              "query": [
+                {
+                  "key": "include_insights",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer Segment (Variable ID)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/customers/{{customer_id}}/segment?include_insights=false",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "customers",
+                "{{customer_id}}",
+                "segment"
+              ],
+              "query": [
+                {
+                  "key": "include_insights",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Insights",
+      "item": [
+        {
+          "name": "Get CLV Insights",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/insights/clv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "insights",
+                "clv"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Gender Insights",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/insights/gender",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "insights",
+                "gender"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Region Insights",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/insights/region",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "insights",
+                "region"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Cluster Insights",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/insights/cluster",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "insights",
+                "cluster"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Exports",
+      "item": [
+        {
+          "name": "Export CLV as CSV",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"format\": \"csv\",\n  \"include_charts\": false,\n  \"columns\": [\"clv_tier\", \"total_customers\", \"avg_clv\", \"avg_income\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/export/clv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "export",
+                "clv"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Export CLV as Excel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"format\": \"excel\",\n  \"include_charts\": true,\n  \"columns\": [\"clv_tier\", \"total_customers\", \"avg_purchase_amount\", \"avg_clv\", \"avg_income\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/export/clv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "export",
+                "clv"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Export CLV as PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"format\": \"pdf\",\n  \"include_charts\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/export/clv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "export",
+                "clv"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Export Gender as CSV",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"format\": \"csv\",\n  \"include_charts\": false,\n  \"columns\": [\"gender\", \"total_customers\", \"avg_income\", \"avg_purchase_amount\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/export/gender",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "export",
+                "gender"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Export Region as Excel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"format\": \"excel\",\n  \"include_charts\": true,\n  \"columns\": [\"region\", \"total_customers\", \"avg_income\", \"avg_purchase_amount\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/export/region",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "export",
+                "region"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health & System",
+      "item": [
+        {
+          "name": "API Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost/csapp/api",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "job_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "customer_id",
+      "value": "12345",
+      "type": "string"
+    }
+  ]
+}
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631

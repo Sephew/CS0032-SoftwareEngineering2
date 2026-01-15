@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "openapi": "3.0.0",
   "info": {
@@ -553,3 +554,560 @@
     }
   }
 }
+=======
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Customer Segmentation API - Single Endpoint Documentation",
+    "description": "GET /segments/{type} - Retrieve Segmentation Results\n\nThis document provides comprehensive OpenAPI/Swagger documentation for the complete GET /segments/{type} endpoint with all request/response parameters, authentication, error handling, and examples.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "api-support@example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost/csapp/api",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://api.example.com/v1",
+      "description": "Production Server"
+    },
+    {
+      "url": "https://staging-api.example.com/v1",
+      "description": "Staging Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Segments",
+      "description": "Operations related to customer segmentation"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT bearer token obtained from the /auth/login endpoint. Token expiration: 3600 seconds (1 hour)"
+      }
+    },
+    "schemas": {
+      "SegmentCLV": {
+        "type": "object",
+        "description": "Customer Lifetime Value segment data",
+        "required": ["clv_tier", "total_customers", "avg_purchase_amount", "avg_frequency", "avg_clv"],
+        "properties": {
+          "clv_tier": {
+            "type": "string",
+            "enum": ["Platinum", "Gold", "Silver", "Bronze"],
+            "description": "CLV tier classification",
+            "example": "Platinum"
+          },
+          "total_customers": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of customers in this segment",
+            "example": 45
+          },
+          "avg_purchase_amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Average purchase amount per customer",
+            "example": 5200.50
+          },
+          "avg_frequency": {
+            "type": "number",
+            "format": "double",
+            "description": "Average purchase frequency (times per period)",
+            "example": 8.2
+          },
+          "avg_clv": {
+            "type": "number",
+            "format": "double",
+            "description": "Average Customer Lifetime Value",
+            "example": 15620.00
+          },
+          "avg_income": {
+            "type": "number",
+            "format": "double",
+            "description": "Average annual income",
+            "example": 85000.00
+          },
+          "avg_lifespan_years": {
+            "type": "number",
+            "format": "double",
+            "description": "Average customer lifespan in years",
+            "example": 5.8
+          }
+        }
+      },
+      "SegmentGender": {
+        "type": "object",
+        "description": "Gender-based segment data",
+        "required": ["gender", "total_customers", "avg_income", "avg_purchase_amount"],
+        "properties": {
+          "gender": {
+            "type": "string",
+            "enum": ["Male", "Female", "Other"],
+            "description": "Gender classification",
+            "example": "Male"
+          },
+          "total_customers": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of customers in this segment",
+            "example": 280
+          },
+          "avg_income": {
+            "type": "number",
+            "format": "double",
+            "description": "Average annual income",
+            "example": 62000.00
+          },
+          "avg_purchase_amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Average purchase amount",
+            "example": 2500.00
+          }
+        }
+      },
+      "SegmentRegion": {
+        "type": "object",
+        "description": "Geographic region segment data",
+        "required": ["region", "total_customers", "avg_income", "avg_purchase_amount"],
+        "properties": {
+          "region": {
+            "type": "string",
+            "description": "Geographic region name",
+            "example": "North America"
+          },
+          "total_customers": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of customers in this region",
+            "example": 450
+          },
+          "avg_income": {
+            "type": "number",
+            "format": "double",
+            "description": "Average annual income in region",
+            "example": 72000.00
+          },
+          "avg_purchase_amount": {
+            "type": "number",
+            "format": "double",
+            "description": "Average purchase amount in region",
+            "example": 3100.00
+          }
+        }
+      },
+      "PaginationMetadata": {
+        "type": "object",
+        "description": "Pagination information for the response",
+        "properties": {
+          "total_records": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total number of records available",
+            "example": 4
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "description": "Maximum records returned in this request",
+            "example": 50
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of records skipped from the beginning",
+            "example": 0
+          },
+          "has_more": {
+            "type": "boolean",
+            "description": "Whether more records are available",
+            "example": false
+          }
+        }
+      },
+      "RequestMetadata": {
+        "type": "object",
+        "description": "Metadata about the API request",
+        "required": ["request_id", "timestamp", "api_version"],
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "description": "Unique request identifier for tracking",
+            "example": "req_abc123def456"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when request was processed",
+            "example": "2026-01-12T12:30:45Z"
+          },
+          "api_version": {
+            "type": "string",
+            "description": "API version used for this response",
+            "example": "1.0.0"
+          },
+          "response_time_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Time taken to process request in milliseconds",
+            "example": 245
+          }
+        }
+      },
+      "SegmentResponse": {
+        "type": "object",
+        "description": "Successful response containing segment data",
+        "required": ["success", "data", "metadata"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the request was successful",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "required": ["segmentation_type", "segments"],
+            "properties": {
+              "segmentation_type": {
+                "type": "string",
+                "enum": ["gender", "region", "age_group", "income_bracket", "cluster", "purchase_tier", "clv"],
+                "description": "Type of segmentation applied",
+                "example": "clv"
+              },
+              "segments": {
+                "type": "array",
+                "minItems": 1,
+                "description": "Array of segment data objects",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/RequestMetadata"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Error response when request fails",
+        "required": ["success", "error", "message", "request_id"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "description": "Error type/category",
+            "example": "Bad Request"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message",
+            "example": "Invalid segmentation type provided"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Unique request identifier for debugging",
+            "example": "req_error_001"
+          }
+        }
+      },
+      "UnauthorizedError": {
+        "type": "object",
+        "description": "Authentication failure response",
+        "required": ["success", "error", "message"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Unauthorized"
+          },
+          "message": {
+            "type": "string",
+            "example": "Missing or invalid authentication token"
+          },
+          "request_id": {
+            "type": "string",
+            "example": "req_unauth_001"
+          }
+        }
+      },
+      "RateLimitError": {
+        "type": "object",
+        "description": "Rate limit exceeded response",
+        "required": ["success", "error", "message", "retry_after_seconds"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "example": "Too Many Requests"
+          },
+          "message": {
+            "type": "string",
+            "example": "Rate limit exceeded. Try again after 245 seconds"
+          },
+          "retry_after_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 245
+          },
+          "request_id": {
+            "type": "string",
+            "example": "req_rate_001"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/segments/{type}": {
+      "get": {
+        "tags": ["Segments"],
+        "operationId": "getSegmentsByType",
+        "summary": "Retrieve customer segments by type",
+        "description": "Retrieves customer segmentation data for a specified segmentation type with pagination support. Supports 7 segmentation types: clv, gender, region, age_group, income_bracket, cluster, purchase_tier.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "description": "Segmentation type to retrieve",
+            "schema": {
+              "type": "string",
+              "enum": ["gender", "region", "age_group", "income_bracket", "cluster", "purchase_tier", "clv"]
+            },
+            "example": "clv"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of records to return per request (1-500, default: 50)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 50
+            },
+            "example": 50
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Number of records to skip from the beginning (for pagination)",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "example": 0
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "description": "Field to sort results by (total_customers, avg_clv, avg_income, avg_purchase_amount)",
+            "schema": {
+              "type": "string",
+              "default": "total_customers"
+            },
+            "example": "total_customers"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction: ASC (ascending) or DESC (descending)",
+            "schema": {
+              "type": "string",
+              "enum": ["ASC", "DESC"],
+              "default": "DESC"
+            },
+            "example": "DESC"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with segmentation data",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Rate limit ceiling for this endpoint",
+                "example": 100
+              },
+              "X-RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Requests remaining in current hour",
+                "example": 87
+              },
+              "X-RateLimit-Reset": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Unix timestamp when rate limit resets",
+                "example": 1673532645
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SegmentResponse"
+                },
+                "examples": {
+                  "CLVExample": {
+                    "summary": "CLV Segmentation Response",
+                    "value": {
+                      "success": true,
+                      "data": {
+                        "segmentation_type": "clv",
+                        "total_records": 4,
+                        "segments": [
+                          {
+                            "clv_tier": "Platinum",
+                            "total_customers": 45,
+                            "avg_purchase_amount": 5200.50,
+                            "avg_frequency": 8.2,
+                            "avg_clv": 15620.00,
+                            "avg_income": 85000.00,
+                            "avg_lifespan_years": 5.8
+                          },
+                          {
+                            "clv_tier": "Gold",
+                            "total_customers": 120,
+                            "avg_purchase_amount": 3800.25,
+                            "avg_frequency": 6.5,
+                            "avg_clv": 10200.00,
+                            "avg_income": 72000.00,
+                            "avg_lifespan_years": 4.2
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "request_id": "req_abc123def456",
+                        "timestamp": "2026-01-12T12:30:45Z",
+                        "api_version": "1.0.0",
+                        "response_time_ms": 245
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid segmentation type or parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Bad Request",
+                  "message": "Invalid segmentation type: invalid_type",
+                  "request_id": "req_err_001"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid JWT token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedError"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Unauthorized",
+                  "message": "Missing or invalid authentication token",
+                  "request_id": "req_unauth_001"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests - Rate limit exceeded (100/hour)",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "integer"
+                },
+                "description": "Seconds to wait before retrying",
+                "example": 245
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Too Many Requests",
+                  "message": "Rate limit exceeded. Try again after 245 seconds",
+                  "retry_after_seconds": 245,
+                  "request_id": "req_rate_001"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Database or server failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Internal Server Error",
+                  "message": "Database query failed",
+                  "request_id": "req_error_500"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+>>>>>>> 0fba2351ce74cfeae68e0015f91c3b7e34f5f631
