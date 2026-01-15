@@ -1,0 +1,776 @@
+openapi: 3.0.0
+info:
+  title: Customer Segmentation API - Single Endpoint Documentation
+  description: |
+    # GET /segments/{type} - Retrieve Segmentation Results
+    
+    This document provides comprehensive OpenAPI/Swagger documentation for the complete 
+    GET /segments/{type} endpoint with all request/response parameters, authentication, 
+    error handling, and examples.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: api-support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  x-logo:
+    url: https://example.com/logo.png
+    altText: Customer Segmentation API
+
+servers:
+  - url: http://localhost/csapp/api
+    description: Local Development Server
+  - url: https://api.example.com/v1
+    description: Production Server
+  - url: https://staging-api.example.com/v1
+    description: Staging Server
+
+tags:
+  - name: Segments
+    description: Operations related to customer segmentation
+    externalDocs:
+      description: Learn more about segmentation
+      url: https://docs.example.com/segmentation
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT bearer token obtained from the /auth/login endpoint.
+        
+        **How to get token:**
+        1. POST to /auth/login with username and password
+        2. Receive access_token in response
+        3. Use token in Authorization header: `Bearer {token}`
+        
+        **Token expiration:** 3600 seconds (1 hour)
+      x-tokenName: access_token
+
+  schemas:
+    SegmentCLV:
+      type: object
+      description: Customer Lifetime Value segment data
+      required:
+        - clv_tier
+        - total_customers
+        - avg_purchase_amount
+        - avg_frequency
+        - avg_clv
+      properties:
+        clv_tier:
+          type: string
+          enum: [Platinum, Gold, Silver, Bronze]
+          description: CLV tier classification
+          example: Platinum
+        total_customers:
+          type: integer
+          minimum: 0
+          description: Number of customers in this segment
+          example: 45
+        avg_purchase_amount:
+          type: number
+          format: double
+          description: Average purchase amount per customer
+          example: 5200.50
+        avg_frequency:
+          type: number
+          format: double
+          description: Average purchase frequency (times per period)
+          example: 8.2
+        avg_clv:
+          type: number
+          format: double
+          description: Average Customer Lifetime Value
+          example: 15620.00
+        avg_income:
+          type: number
+          format: double
+          description: Average annual income
+          example: 85000.00
+        avg_lifespan_years:
+          type: number
+          format: double
+          description: Average customer lifespan in years
+          example: 5.8
+
+    SegmentGender:
+      type: object
+      description: Gender-based segment data
+      required:
+        - gender
+        - total_customers
+        - avg_income
+        - avg_purchase_amount
+      properties:
+        gender:
+          type: string
+          enum: [Male, Female, Other]
+          description: Gender classification
+          example: Male
+        total_customers:
+          type: integer
+          minimum: 0
+          description: Number of customers in this segment
+          example: 280
+        avg_income:
+          type: number
+          format: double
+          description: Average annual income
+          example: 62000.00
+        avg_purchase_amount:
+          type: number
+          format: double
+          description: Average purchase amount
+          example: 2500.00
+
+    SegmentRegion:
+      type: object
+      description: Geographic region segment data
+      required:
+        - region
+        - total_customers
+        - avg_income
+        - avg_purchase_amount
+      properties:
+        region:
+          type: string
+          description: Geographic region name
+          example: North America
+        total_customers:
+          type: integer
+          minimum: 0
+          description: Number of customers in this region
+          example: 450
+        avg_income:
+          type: number
+          format: double
+          description: Average annual income in region
+          example: 72000.00
+        avg_purchase_amount:
+          type: number
+          format: double
+          description: Average purchase amount in region
+          example: 3100.00
+
+    PaginationMetadata:
+      type: object
+      description: Pagination information for the response
+      properties:
+        total_records:
+          type: integer
+          minimum: 0
+          description: Total number of records available
+          example: 4
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 500
+          description: Maximum records returned in this request
+          example: 50
+        offset:
+          type: integer
+          minimum: 0
+          description: Number of records skipped from the beginning
+          example: 0
+        has_more:
+          type: boolean
+          description: Whether more records are available
+          example: false
+
+    RequestMetadata:
+      type: object
+      description: Metadata about the API request
+      required:
+        - request_id
+        - timestamp
+        - api_version
+      properties:
+        request_id:
+          type: string
+          pattern: '^req_[a-z0-9]{12}$'
+          description: Unique request identifier for tracking
+          example: req_abc123def456
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when request was processed
+          example: 2026-01-12T12:30:45Z
+        api_version:
+          type: string
+          pattern: '^\d+\.\d+\.\d+$'
+          description: API version used for this response
+          example: 1.0.0
+        response_time_ms:
+          type: integer
+          minimum: 0
+          description: Time taken to process request in milliseconds
+          example: 245
+
+    SegmentResponse:
+      type: object
+      description: Successful response containing segment data
+      required:
+        - success
+        - data
+        - metadata
+      properties:
+        success:
+          type: boolean
+          description: Whether the request was successful
+          example: true
+        data:
+          type: object
+          required:
+            - segmentation_type
+            - segments
+          properties:
+            segmentation_type:
+              type: string
+              enum: [gender, region, age_group, income_bracket, cluster, purchase_tier, clv]
+              description: Type of segmentation applied
+              example: clv
+            segments:
+              type: array
+              minItems: 1
+              description: Array of segment data objects
+              oneOf:
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/SegmentCLV'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/SegmentGender'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/SegmentRegion'
+              example:
+                - clv_tier: Platinum
+                  total_customers: 45
+                  avg_purchase_amount: 5200.50
+                  avg_frequency: 8.2
+                  avg_clv: 15620.00
+                  avg_income: 85000.00
+                  avg_lifespan_years: 5.8
+                - clv_tier: Gold
+                  total_customers: 120
+                  avg_purchase_amount: 3800.25
+                  avg_frequency: 6.5
+                  avg_clv: 10200.00
+                  avg_income: 72000.00
+                  avg_lifespan_years: 4.2
+        pagination:
+          $ref: '#/components/schemas/PaginationMetadata'
+        metadata:
+          $ref: '#/components/schemas/RequestMetadata'
+
+    ErrorResponse:
+      type: object
+      description: Error response when request fails
+      required:
+        - success
+        - error
+        - message
+        - request_id
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Error type/category
+          example: Bad Request
+        message:
+          type: string
+          description: Human-readable error message
+          example: Invalid segmentation type provided
+        request_id:
+          type: string
+          description: Unique request identifier for debugging
+          example: req_error_001
+
+    UnauthorizedError:
+      type: object
+      description: Authentication failure response
+      required:
+        - success
+        - error
+        - message
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+          example: Missing or invalid authentication token
+        request_id:
+          type: string
+          example: req_unauth_001
+
+    RateLimitError:
+      type: object
+      description: Rate limit exceeded response
+      required:
+        - success
+        - error
+        - message
+        - retry_after_seconds
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: Too Many Requests
+        message:
+          type: string
+          example: Rate limit exceeded. Try again after 245 seconds
+        retry_after_seconds:
+          type: integer
+          minimum: 1
+          example: 245
+        request_id:
+          type: string
+          example: req_rate_001
+
+paths:
+  /segments/{type}:
+    get:
+      tags:
+        - Segments
+      operationId: getSegmentsByType
+      summary: Retrieve customer segments by type
+      description: |
+        # Overview
+        Retrieves customer segmentation data for a specified segmentation type with pagination support.
+        
+        # Segmentation Types
+        - **clv**: Customer Lifetime Value (Platinum, Gold, Silver, Bronze)
+        - **gender**: Gender-based segmentation (Male, Female, Other)
+        - **region**: Geographic region segmentation
+        - **age_group**: Age range grouping (18-25, 26-40, 41-60, 61+)
+        - **income_bracket**: Income level classification
+        - **purchase_tier**: Customer spending tier
+        - **cluster**: Machine learning cluster assignment
+        
+        # Rate Limiting
+        - Default: **100 requests per hour**
+        - Rate limit headers included in response
+        
+        # Authentication
+        Requires valid JWT Bearer token from `/auth/login` endpoint
+        
+        # Use Cases
+        1. Export customer segments to external systems
+        2. Build dashboards with segment metrics
+        3. Create targeted marketing campaigns
+        4. Analyze customer distribution and behavior
+        
+      security:
+        - BearerAuth: []
+
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: Segmentation type to retrieve
+          schema:
+            type: string
+            enum:
+              - gender
+              - region
+              - age_group
+              - income_bracket
+              - cluster
+              - purchase_tier
+              - clv
+          example: clv
+
+        - name: limit
+          in: query
+          required: false
+          description: |
+            Maximum number of records to return per request.
+            
+            **Constraints:**
+            - Minimum: 1
+            - Maximum: 500
+            - Default: 50
+            
+            **Tip:** Use smaller limit for faster responses, larger limit for batch operations
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 50
+          example: 50
+
+        - name: offset
+          in: query
+          required: false
+          description: |
+            Number of records to skip from the beginning.
+            
+            **For pagination:**
+            - Page 1: offset=0
+            - Page 2: offset=50 (with limit=50)
+            - Page 3: offset=100 (with limit=50)
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          example: 0
+
+        - name: sort_by
+          in: query
+          required: false
+          description: |
+            Field to sort results by.
+            
+            **Common options:**
+            - `total_customers`: Number of customers in segment
+            - `avg_clv`: Average customer lifetime value
+            - `avg_income`: Average income
+            - `avg_purchase_amount`: Average purchase amount
+          schema:
+            type: string
+            default: total_customers
+          example: total_customers
+
+        - name: sort_order
+          in: query
+          required: false
+          description: |
+            Sort direction for results.
+            
+            - `ASC`: Ascending order (low to high)
+            - `DESC`: Descending order (high to low)
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: DESC
+          example: DESC
+
+      responses:
+        '200':
+          description: |
+            ## Successful Response
+            
+            Returns segmentation data with pagination info and metadata.
+            
+            **What's included:**
+            - Segment data array with calculated metrics
+            - Pagination information (total, limit, offset)
+            - Request metadata (ID, timestamp, version)
+            - Rate limit headers
+            
+            **Response Headers:**
+            - `X-RateLimit-Limit`: Total requests allowed per hour
+            - `X-RateLimit-Remaining`: Requests remaining this hour
+            - `X-RateLimit-Reset`: Unix timestamp when limit resets
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+              description: Rate limit ceiling for this endpoint
+              example: 100
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+              description: Requests remaining in current hour
+              example: 87
+            X-RateLimit-Reset:
+              schema:
+                type: integer
+              description: Unix timestamp when rate limit resets
+              example: 1673532645
+            Cache-Control:
+              schema:
+                type: string
+              description: Caching directive
+              example: private, max-age=60
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SegmentResponse'
+              examples:
+                CLVExample:
+                  summary: CLV Segmentation Response
+                  description: Example response for CLV segmentation type
+                  value:
+                    success: true
+                    data:
+                      segmentation_type: clv
+                      total_records: 4
+                      limit: 50
+                      offset: 0
+                      segments:
+                        - clv_tier: Platinum
+                          total_customers: 45
+                          avg_purchase_amount: 5200.50
+                          avg_frequency: 8.2
+                          avg_clv: 15620.00
+                          avg_income: 85000.00
+                          avg_lifespan_years: 5.8
+                        - clv_tier: Gold
+                          total_customers: 120
+                          avg_purchase_amount: 3800.25
+                          avg_frequency: 6.5
+                          avg_clv: 10200.00
+                          avg_income: 72000.00
+                          avg_lifespan_years: 4.2
+                        - clv_tier: Silver
+                          total_customers: 280
+                          avg_purchase_amount: 2100.75
+                          avg_frequency: 5.2
+                          avg_clv: 7200.00
+                          avg_income: 62000.00
+                          avg_lifespan_years: 3.5
+                        - clv_tier: Bronze
+                          total_customers: 555
+                          avg_purchase_amount: 800.00
+                          avg_frequency: 2.1
+                          avg_clv: 2500.00
+                          avg_income: 45000.00
+                          avg_lifespan_years: 1.8
+                    metadata:
+                      request_id: req_abc123def456
+                      timestamp: 2026-01-12T12:30:45Z
+                      api_version: 1.0.0
+                      response_time_ms: 245
+
+                GenderExample:
+                  summary: Gender Segmentation Response
+                  description: Example response for gender segmentation type
+                  value:
+                    success: true
+                    data:
+                      segmentation_type: gender
+                      total_records: 3
+                      limit: 50
+                      offset: 0
+                      segments:
+                        - gender: Male
+                          total_customers: 450
+                          avg_income: 68000.00
+                          avg_purchase_amount: 2800.50
+                        - gender: Female
+                          total_customers: 480
+                          avg_income: 65000.00
+                          avg_purchase_amount: 2600.75
+                        - gender: Other
+                          total_customers: 70
+                          avg_income: 62000.00
+                          avg_purchase_amount: 2400.00
+                    metadata:
+                      request_id: req_xyz789abc
+                      timestamp: 2026-01-12T12:31:15Z
+                      api_version: 1.0.0
+                      response_time_ms: 178
+
+        '400':
+          description: |
+            ## Bad Request Error
+            
+            **Causes:**
+            - Invalid segmentation type
+            - Invalid query parameters (negative limit, invalid sort)
+            - Malformed request
+            
+            **Resolution:**
+            - Check segmentation type is valid (clv, gender, region, etc.)
+            - Verify limit is 1-500
+            - Ensure offset is non-negative
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                InvalidType:
+                  summary: Invalid Segmentation Type
+                  value:
+                    success: false
+                    error: Bad Request
+                    message: Invalid segmentation type: invalid_type
+                    request_id: req_err_001
+                InvalidLimit:
+                  summary: Invalid Limit Parameter
+                  value:
+                    success: false
+                    error: Bad Request
+                    message: Limit must be between 1 and 500
+                    request_id: req_err_002
+
+        '401':
+          description: |
+            ## Unauthorized Error
+            
+            **Causes:**
+            - Missing Authorization header
+            - Invalid or expired JWT token
+            - Token signature verification failed
+            
+            **Resolution:**
+            1. Get new token from `/auth/login` endpoint
+            2. Include in request: `Authorization: Bearer {token}`
+            3. Check token hasn't expired (3600 second limit)
+            
+            **Example header:**
+            ```
+            Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+            ```
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+              example:
+                success: false
+                error: Unauthorized
+                message: Missing or invalid authentication token
+                request_id: req_unauth_001
+
+        '429':
+          description: |
+            ## Rate Limited Error
+            
+            **Cause:** Too many requests in current hour (limit: 100/hour)
+            
+            **Resolution:**
+            1. Check `X-RateLimit-Remaining` header for requests left
+            2. Check `Retry-After` header for wait time in seconds
+            3. Wait until `X-RateLimit-Reset` timestamp passes
+            4. Resume requests after rate limit resets
+            
+            **Rate limit resets:** Every hour on the hour
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds to wait before retrying
+              example: 245
+            X-RateLimit-Reset:
+              schema:
+                type: integer
+              description: Unix timestamp when rate limit resets
+              example: 1673532645
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+              example:
+                success: false
+                error: Too Many Requests
+                message: Rate limit exceeded. Try again after 245 seconds
+                retry_after_seconds: 245
+                request_id: req_rate_001
+
+        '500':
+          description: |
+            ## Internal Server Error
+            
+            **Causes:**
+            - Database connection failure
+            - Unexpected server error
+            - Query execution failed
+            
+            **Resolution:**
+            1. Check API status at `/health` endpoint
+            2. Retry request after 30 seconds
+            3. Contact support if error persists
+            4. Include request_id in support ticket for debugging
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: Internal Server Error
+                message: Database query failed
+                request_id: req_error_500
+
+      x-code-samples:
+        - lang: curl
+          source: |
+            # Get CLV segments
+            curl -X GET 'http://localhost/csapp/api/segments/clv?limit=50&offset=0&sort_by=total_customers&sort_order=DESC' \
+              -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' \
+              -H 'Content-Type: application/json'
+
+        - lang: javascript
+          source: |
+            // Get CLV segments using Fetch API
+            const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+            
+            fetch('http://localhost/csapp/api/segments/clv?limit=50&offset=0', {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+
+        - lang: python
+          source: |
+            import requests
+            
+            token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+            headers = {
+                'Authorization': f'Bearer {token}',
+                'Content-Type': 'application/json'
+            }
+            
+            response = requests.get(
+                'http://localhost/csapp/api/segments/clv',
+                headers=headers,
+                params={'limit': 50, 'offset': 0}
+            )
+            
+            print(response.json())
+
+        - lang: php
+          source: |
+            <?php
+            $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+            
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'http://localhost/csapp/api/segments/clv');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $token,
+                'Content-Type: application/json'
+            ]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            
+            $response = curl_exec($ch);
+            echo json_encode(json_decode($response), JSON_PRETTY_PRINT);
+            ?>
+
+        - lang: csharp
+          source: |
+            using System;
+            using System.Net.Http;
+            using System.Threading.Tasks;
+            
+            class Program {
+                static async Task Main() {
+                    var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+                    
+                    using (var client = new HttpClient()) {
+                        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                        
+                        var response = await client.GetAsync(
+                            "http://localhost/csapp/api/segments/clv?limit=50"
+                        );
+                        var content = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine(content);
+                    }
+                }
+            }
